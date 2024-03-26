@@ -4,10 +4,10 @@ RF24 radio(PIN_SPI_CE, PIN_SPI_CSN);
 
     // Radio Address: each team should choose a unique address string
     // I suggest "TM0xx" where xx is your team number  ex:  TM001, TM014
-const byte addresses[6] = "TM011";
+const byte addresses[6] = "TM008";
     // Radio Channel: each team should choose a unique channel number between 20 and 127
     // I suggest you use:   (TeamNumber * 5) + 15  ex:  team 4 would use channel 35
-const int RF24channel = 70;  //each team should choose a unique channel
+const int RF24channel = 55;  //each team should choose a unique channel
 
 int nrfDataRead[8];
 bool nrfComplete = false;
