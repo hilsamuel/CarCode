@@ -13,6 +13,7 @@
 #include "SSD1306AsciiWire.h"
 #define I2C_ADDRESS 0x3C
 SSD1306AsciiWire oled;
+int buttonPressed = 0;
 
 void setupScreen() {
   Wire.begin();
@@ -93,13 +94,33 @@ void loop() {
       if (nrfDataRead[7] == 0) {
         mode = MODE_AUTO;
         screenPrint(3,1,"Mode: Auto");        
-              
+        buttonPressed = 7;     
         automode = AUTO_MODE_STOP;
         alarm(1, 1);     
         start_time = millis();
         //Serial.println(start_time);
         servo1.write(SERVO_STOP);
       }  
+      if (nrfDataRead[6] == 0) {
+        mode = MODE_AUTO;
+        screenPrint(3,1,"Mode: Auto");        
+        buttonPressed = 6;         
+        automode = AUTO_MODE_STOP;
+        alarm(1, 1);     
+        start_time = millis();
+        //Serial.println(start_time);
+        servo1.write(SERVO_STOP);
+      }
+      if (nrfDataRead[5] == 0) {
+        mode = MODE_AUTO;
+        screenPrint(3,1,"Mode: Auto");        
+        buttonPressed = 5;         
+        automode = AUTO_MODE_STOP;
+        alarm(1, 1);     
+        start_time = millis();
+        //Serial.println(start_time);
+        servo1.write(SERVO_STOP);
+      }
       if (nrfDataRead[4] == 0) {
         mode = MODE_MANUAL;
         screenPrint(3,1,"Mode: Manual"); 
@@ -119,7 +140,13 @@ void loop() {
         screenPrint(4,1," ");          
         alarm(2, 1);            
       } else {
-        autonomous(delta_time);
+        if (buttonPressed == 7) {
+          autonomous(delta_time);
+        } else if (buttonPressed == 6) {
+          autonomous2(delta_time);
+        } else if (buttonPressed == 5) {
+          autonomous3(delta_time);
+        }
       }
     }
 
@@ -166,20 +193,38 @@ void manual() {
 void autonomous(int now) {
   int endtime_prev = 0;
   //                    mode        current_time  start   duration
-  endtime_prev = do_auto(AUTO_MODE_FORWARD,   now,    0,      1500);
-  endtime_prev = do_auto(AUTO_MODE_STOP,      now,  endtime_prev, 1000);
-  endtime_prev = do_auto(AUTO_MODE_BACKWARD,  now,  endtime_prev, 1500);
-  endtime_prev = do_auto(AUTO_MODE_STOP,      now,  endtime_prev, 1000);
-  endtime_prev = do_auto(AUTO_MODE_RIGHTTURN, now,  endtime_prev, 1500);
-  endtime_prev = do_auto(AUTO_MODE_STOP,      now,  endtime_prev, 1000);
-  endtime_prev = do_auto(AUTO_MODE_LEFTTURN,  now,  endtime_prev, 1500);
-  endtime_prev = do_auto(AUTO_MODE_STOP,      now,  endtime_prev, 1000);
-  endtime_prev = do_auto(AUTO_MODE_SERVO_POS, now,  endtime_prev, 1500);
-  endtime_prev = do_auto(AUTO_MODE_STOP,      now,  endtime_prev, 1000);
+  endtime_prev = do_auto(AUTO_MODE_BACKWARD, now , 0 , 1700);
+  endtime_prev = do_auto(AUTO_MODE_SERVO_POS, now, endtime_prev, 1700);
   endtime_prev = do_auto(AUTO_MODE_SERVO_NEG, now,  endtime_prev, 1500);
-  endtime_prev = do_auto(AUTO_MODE_STOP,      now,  endtime_prev, 500);
+  endtime_prev = do_auto(AUTO_MODE_FORWARD,   now,    endtime_prev,      3000);
+  //endtime_prev = do_auto(AUTO_MODE_STOP,      now,  endtime_prev, 1000);
+  endtime_prev = do_auto(AUTO_MODE_STOP,      now,  endtime_prev, 1000);
+  //endtime_prev = do_auto(AUTO_MODE_LEFTTURN, now, endtime_prev, 200 );
+  //endtime_prev = do_auto(AUTO_MODE_SERVO_POS, now, endtime_prev, 1500); This is top positioning
 }
-
+void autonomous2(int now) {
+  int endtime_prev = 0;
+  //                    mode        current_time  start   duration
+  endtime_prev = do_auto(AUTO_MODE_BACKWARD, now , 0 , 1600);
+  endtime_prev = do_auto(AUTO_MODE_SERVO_POS, now, endtime_prev, 1500);
+  endtime_prev = do_auto(AUTO_MODE_SERVO_NEG, now,  endtime_prev, 1500);
+  endtime_prev = do_auto(AUTO_MODE_FORWARD,   now,    endtime_prev,      3000);
+  endtime_prev = do_auto(AUTO_MODE_STOP,      now,  endtime_prev, 1000);
+  //endtime_prev = do_auto(AUTO_MODE_LEFTTURN, now, endtime_prev, 200 );
+  //endtime_prev = do_auto(AUTO_MODE_SERVO_POS, now, endtime_prev, 1500); This is top positioning
+}
+void autonomous3(int now) {
+  int endtime_prev = 0; //Perfect farthest DO NOT TOUCH
+  //                    mode        current_time  start   duration
+  endtime_prev = do_auto(AUTO_MODE_BACKWARD, now , 0 , 1400);
+  endtime_prev = do_auto(AUTO_MODE_SERVO_POS, now, endtime_prev, 1700);
+  endtime_prev = do_auto(AUTO_MODE_SERVO_NEG, now,  endtime_prev, 1500);
+  endtime_prev = do_auto(AUTO_MODE_FORWARD,   now,    endtime_prev,      3000);
+  //endtime_prev = do_auto(AUTO_MODE_STOP,      now,  endtime_prev, 1000);
+  endtime_prev = do_auto(AUTO_MODE_STOP,      now,  endtime_prev, 1000);
+  //endtime_prev = do_auto(AUTO_MODE_LEFTTURN, now, endtime_prev, 200 );
+  //endtime_prev = do_auto(AUTO_MODE_SERVO_POS, now, endtime_prev, 1500); This is top positioning
+}
 int do_auto(int automode, int current_time,  int start_time, int duration) {
 
   int stop_time = start_time + duration;
@@ -192,10 +237,11 @@ int do_auto(int automode, int current_time,  int start_time, int duration) {
     servo1.write(90);
       break;
   case AUTO_MODE_FORWARD:
-    motorRun(150, 150);
+    motorRun(200, 255);
       break;
+
   case AUTO_MODE_BACKWARD:
-    motorRun(-150, -150);
+    motorRun(210, 220);
       break;
   case AUTO_MODE_RIGHTTURN:
       motorRun(200, -200);
@@ -209,7 +255,7 @@ int do_auto(int automode, int current_time,  int start_time, int duration) {
       break;
   case AUTO_MODE_SERVO_NEG:
       motorRun(0, 0);
-      servo1.write(0);
+      servo1.write(90);
       break;
   }  
   return stop_time;
